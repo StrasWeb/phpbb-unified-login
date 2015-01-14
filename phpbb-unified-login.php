@@ -5,6 +5,7 @@
  */
 /*
 Plugin Name: phpBB Unified Login
+Plugin URI: https://github.com/StrasWeb/phpbb-unified-login
 Author: StrasWeb
 Version: 1.0
 Author URI: http://strasweb.fr/
