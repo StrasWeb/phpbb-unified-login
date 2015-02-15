@@ -16,15 +16,15 @@ define('IN_PHPBB', true);
 define('ROOT_PATH', get_option('phpbb_root'));
 $phpbb_root_path = ROOT_PATH . '/';
 if (is_file($phpbb_root_path . 'config.'.$phpEx) && is_dir($phpbb_root_path . 'includes/acm/')) {
-    require $phpbb_root_path . 'config.'.$phpEx;
-    require $phpbb_root_path . 'includes/constants.'.$phpEx;
-    require $phpbb_root_path . 'includes/functions.'.$phpEx;
-    require $phpbb_root_path . 'includes/acm/acm_' . $acm_type . '.' . $phpEx;
-    require $phpbb_root_path . 'includes/db/' . $dbms . '.' . $phpEx;
-    require $phpbb_root_path . 'includes/cache.'.$phpEx;
-    require $phpbb_root_path . 'includes/session.'.$phpEx;
-    require $phpbb_root_path . 'includes/auth.' . $phpEx;
-    require $phpbb_root_path . 'includes/utf/utf_tools.' . $phpEx;
+    include $phpbb_root_path . 'config.'.$phpEx;
+    include $phpbb_root_path . 'includes/constants.'.$phpEx;
+    include $phpbb_root_path . 'includes/functions.'.$phpEx;
+    include $phpbb_root_path . 'includes/acm/acm_' . $acm_type . '.' . $phpEx;
+    include $phpbb_root_path . 'includes/db/' . $dbms . '.' . $phpEx;
+    include $phpbb_root_path . 'includes/cache.'.$phpEx;
+    include $phpbb_root_path . 'includes/session.'.$phpEx;
+    include $phpbb_root_path . 'includes/auth.' . $phpEx;
+    include $phpbb_root_path . 'includes/utf/utf_tools.' . $phpEx;
 
     $cache = new cache();
     $db = new $sql_db();
@@ -42,8 +42,7 @@ if (is_file($phpbb_root_path . 'config.'.$phpEx) && is_dir($phpbb_root_path . 'i
     {
         global $cache, $db;
 
-        if (empty($user_id_ary))
-        {
+        if (empty($user_id_ary)) {
             return;
         }
 
@@ -61,8 +60,7 @@ if (is_file($phpbb_root_path . 'config.'.$phpEx) && is_dir($phpbb_root_path . 'i
         );
 
         // Were group attributes passed to the function? If not we need to obtain them
-        if ($group_attributes === false)
-        {
+        if ($group_attributes === false) {
             $sql = 'SELECT ' . implode(', ', array_keys($attribute_ary)) . '
                 FROM ' . GROUPS_TABLE . "
                 WHERE group_id = $group_id";
@@ -73,11 +71,9 @@ if (is_file($phpbb_root_path . 'config.'.$phpEx) && is_dir($phpbb_root_path . 'i
 
         foreach ($attribute_ary as $attribute => $type)
         {
-            if (isset($group_attributes[$attribute]))
-            {
+            if (isset($group_attributes[$attribute])) {
                 // If we are about to set an avatar or rank, we will not overwrite with empty, unless we are not actually changing the default group
-                if ((strpos($attribute, 'group_avatar') === 0 || strpos($attribute, 'group_rank') === 0) && !$group_attributes[$attribute])
-                {
+                if ((strpos($attribute, 'group_avatar') === 0 || strpos($attribute, 'group_rank') === 0) && !$group_attributes[$attribute]) {
                     continue;
                 }
 
@@ -87,8 +83,7 @@ if (is_file($phpbb_root_path . 'config.'.$phpEx) && is_dir($phpbb_root_path . 'i
         }
 
         // Before we update the user attributes, we will make a list of those having now the group avatar assigned
-        if (isset($sql_ary['user_avatar']))
-        {
+        if (isset($sql_ary['user_avatar'])) {
             // Ok, get the original avatar data from users having an uploaded one (we need to remove these from the filesystem)
             $sql = 'SELECT user_id, group_id, user_avatar
                 FROM ' . USERS_TABLE . '
@@ -113,8 +108,7 @@ if (is_file($phpbb_root_path . 'config.'.$phpEx) && is_dir($phpbb_root_path . 'i
             WHERE ' . $db->sql_in_set('user_id', $user_id_ary);
         $db->sql_query($sql);
 
-        if (isset($sql_ary['user_colour']))
-        {
+        if (isset($sql_ary['user_colour'])) {
             // Update any cached colour information for these users
             $sql = 'UPDATE ' . FORUMS_TABLE . " SET forum_last_poster_colour = '" . $db->sql_escape($sql_ary['user_colour']) . "'
                 WHERE " . $db->sql_in_set('forum_last_poster_id', $user_id_ary);
@@ -130,14 +124,12 @@ if (is_file($phpbb_root_path . 'config.'.$phpEx) && is_dir($phpbb_root_path . 'i
 
             global $config;
 
-            if (in_array($config['newest_user_id'], $user_id_ary))
-            {
+            if (in_array($config['newest_user_id'], $user_id_ary)) {
                 set_config('newest_user_colour', $sql_ary['user_colour'], true);
             }
         }
 
-        if ($update_listing)
-        {
+        if ($update_listing) {
             group_update_listings($group_id);
         }
 
@@ -148,23 +140,21 @@ if (is_file($phpbb_root_path . 'config.'.$phpEx) && is_dir($phpbb_root_path . 'i
     /**
     * Adds an user
     *
-    * @param mixed $user_row An array containing the following keys (and the appropriate values): username, group_id (the group to place the user in), user_email and the user_type(usually 0). Additional entries not overridden by defaults will be forwarded.
-    * @param string $cp_data custom profile fields, see custom_profile::build_insert_sql_array
+    * @param  mixed  $user_row An array containing the following keys (and the appropriate values): username, group_id (the group to place the user in), user_email and the user_type(usually 0). Additional entries not overridden by defaults will be forwarded.
+    * @param  string $cp_data  custom profile fields, see custom_profile::build_insert_sql_array
     * @return the new user's ID.
     */
     function PhpBB_user_add($user_row, $cp_data = false)
     {
         global $db, $user, $auth, $config, $phpbb_root_path, $phpEx;
 
-        if (empty($user_row['username']) || !isset($user_row['group_id']) || !isset($user_row['user_email']) || !isset($user_row['user_type']))
-        {
+        if (empty($user_row['username']) || !isset($user_row['group_id']) || !isset($user_row['user_email']) || !isset($user_row['user_type'])) {
             return false;
         }
 
         $username_clean = utf8_clean_string($user_row['username']);
 
-        if (empty($username_clean))
-        {
+        if (empty($username_clean)) {
             return false;
         }
 
@@ -241,8 +231,7 @@ if (is_file($phpbb_root_path . 'config.'.$phpEx) && is_dir($phpbb_root_path . 'i
         $remaining_vars = array_diff(array_keys($user_row), array_keys($sql_ary));
 
         // Now fill our sql array with the remaining vars
-        if (sizeof($remaining_vars))
-        {
+        if (sizeof($remaining_vars)) {
             foreach ($remaining_vars as $key)
             {
                 $sql_ary[$key] = $user_row[$key];
@@ -255,13 +244,11 @@ if (is_file($phpbb_root_path . 'config.'.$phpEx) && is_dir($phpbb_root_path . 'i
         $user_id = $db->sql_nextid();
 
         // Insert Custom Profile Fields
-        if ($cp_data !== false && sizeof($cp_data))
-        {
+        if ($cp_data !== false && sizeof($cp_data)) {
             $cp_data['user_id'] = (int) $user_id;
 
-            if (!class_exists('custom_profile'))
-            {
-                include_once($phpbb_root_path . 'includes/functions_profile_fields.' . $phpEx);
+            if (!class_exists('custom_profile')) {
+                include_once$phpbb_root_path . 'includes/functions_profile_fields.' . $phpEx;
             }
 
             $sql = 'INSERT INTO ' . PROFILE_FIELDS_DATA_TABLE . ' ' .
@@ -270,7 +257,8 @@ if (is_file($phpbb_root_path . 'config.'.$phpEx) && is_dir($phpbb_root_path . 'i
         }
 
         // Place into appropriate group...
-        $sql = 'INSERT INTO ' . USER_GROUP_TABLE . ' ' . $db->sql_build_array('INSERT', array(
+        $sql = 'INSERT INTO ' . USER_GROUP_TABLE . ' ' . $db->sql_build_array(
+            'INSERT', array(
             'user_id'       => (int) $user_id,
             'group_id'      => (int) $user_row['group_id'],
             'user_pending'  => 0)
@@ -281,8 +269,7 @@ if (is_file($phpbb_root_path . 'config.'.$phpEx) && is_dir($phpbb_root_path . 'i
         PhpBB_group_set_user_default($user_row['group_id'], array($user_id), false);
 
         // Add to newly registered users group if user_new is 1
-        if ($config['new_member_post_limit'] && $sql_ary['user_new'])
-        {
+        if ($config['new_member_post_limit'] && $sql_ary['user_new']) {
             $sql = 'SELECT group_id
                 FROM ' . GROUPS_TABLE . "
                 WHERE group_name = 'NEWLY_REGISTERED'
@@ -291,14 +278,12 @@ if (is_file($phpbb_root_path . 'config.'.$phpEx) && is_dir($phpbb_root_path . 'i
             $add_group_id = (int) $db->sql_fetchfield('group_id');
             $db->sql_freeresult($result);
 
-            if ($add_group_id)
-            {
+            if ($add_group_id) {
                 // Because these actions only fill the log unneccessarily we skip the add_log() entry with a little hack. :/
                 $GLOBALS['skip_add_log'] = true;
 
                 // Add user to "newly registered users" group and set to default group if admin specified so.
-                if ($config['new_member_group_default'])
-                {
+                if ($config['new_member_group_default']) {
                     group_user_add($add_group_id, $user_id, false, false, true);
                     $user_row['group_id'] = $add_group_id;
                 }
@@ -312,8 +297,7 @@ if (is_file($phpbb_root_path . 'config.'.$phpEx) && is_dir($phpbb_root_path . 'i
         }
 
         // set the newest user and adjust the user count if the user is a normal user and no activation mail is sent
-        if ($user_row['user_type'] == USER_NORMAL || $user_row['user_type'] == USER_FOUNDER)
-        {
+        if ($user_row['user_type'] == USER_NORMAL || $user_row['user_type'] == USER_FOUNDER) {
             set_config('newest_user_id', $user_id, true);
             set_config('newest_username', $user_row['username'], true);
             set_config_count('num_users', 1, true);
@@ -374,19 +358,21 @@ if (is_file($phpbb_root_path . 'config.'.$phpEx) && is_dir($phpbb_root_path . 'i
     add_action('user_register', 'PhpBB_signup');
 }
 
-function PhpBB_settings_path() {
-    echo '<input name="phpbb_root" placeholder="/var/www/phpbb" value="'.get_option( 'phpbb_root' ). '" type="text" />';
+function PhpBB_settings_path()
+{
+    echo '<input name="phpbb_root" placeholder="/var/www/phpbb" value="'.get_option('phpbb_root'). '" type="text" />';
 }
 
-function PhpBB_settings() {
+function PhpBB_settings()
+{
     add_settings_field(
         'phpbb_root',
         'phpBB path',
         'PhpBB_settings_path',
         'general'
     );
-    register_setting( 'general', 'phpbb_root' );
+    register_setting('general', 'phpbb_root');
 } 
  
-add_action( 'admin_init', 'PhpBB_settings' );
+add_action('admin_init', 'PhpBB_settings');
 ?>
