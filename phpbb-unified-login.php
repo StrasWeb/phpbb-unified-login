@@ -15,7 +15,7 @@ $phpEx = "php";
 define('IN_PHPBB', true);
 define('ROOT_PATH', get_option('phpbb_root'));
 $phpbb_root_path = ROOT_PATH . '/';
-if (is_file($phpbb_root_path . 'config.'.$phpEx)) {
+if (is_file($phpbb_root_path . 'config.'.$phpEx) && is_dir($phpbb_root_path . 'includes/acm/')) {
     require $phpbb_root_path . 'config.'.$phpEx;
     require $phpbb_root_path . 'includes/constants.'.$phpEx;
     require $phpbb_root_path . 'includes/functions.'.$phpEx;
